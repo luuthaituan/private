@@ -15,7 +15,7 @@ pipeline
                 sh 'cd /var/www/private'
                 sh 'git pull https://github.com/luuthaituan/private.git main'
                 sh 'composer install && sudo -S docker-compose build'
-                sh 'npm run build'
+                sh 'npm install && npm run build'
             }
         }
 
