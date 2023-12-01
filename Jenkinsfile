@@ -20,7 +20,7 @@ pipeline
 
         stage('Deploy'){
             steps{
-                echo "Hey, this is the second process, hope it will success"
+                echo "Hey, this is the second proccess, hope it will success"
                 sh 'cd /var/www/private'
                 sh 'sudo -S docker-compose up -d && sudo docker-compose ps'
                 sh 'sudo -S docker-compose down'
