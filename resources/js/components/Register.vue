@@ -1,43 +1,74 @@
 <template>
-    <section class="vh-100 login-form">
-        <div class="container py-5 h-100">
-            <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                    <div class="card bg-dark text-white" style="border-radius: 1rem;">
-                        <div class="card-body p-5 text-center">
-                            <div class="mb-md-5 mt-md-4 pb-5">
-                                <form action="javascript:void(0)" @submit="register" method="post">
-                                    <h2 class="fw-bold mb-2 text-uppercase">Register</h2>
-                                    <p class="text-white-50 mb-5">Please enter your login and password!</p>
-                                    <div class="form-outline form-white mb-4">
-                                        <label class="visually-hidden" for="name">Enter name</label>
-                                        <input type="text" name="name" v-model="user.name" id="name" placeholder="Enter name" class="form-control form-control-lg" />
-                                    </div>
-                                    <div class="form-outline form-white mb-4">
-                                        <label class="visually-hidden" for="email">Enter email</label>
-                                        <input type="email" v-model="user.email" name="email" id="email" class="form-control form-control-lg" placeholder="Enter email" />
-                                    </div>
-                                    <div class="form-outline form-white mb-4">
-                                        <label class="visually-hidden" for="password">Enter password</label>
-                                        <input type="password" v-model="user.password" name="password" id="password" class="form-control form-control-lg" placeholder="Enter password" />
-                                    </div>
-                                    <div class="form-outline form-white mb-4">
-                                        <label class="visually-hidden" for="password">Enter password</label>
-                                        <input type="password" name="password_confirmation" v-model="user.password_confirmation" id="password_confirmation" placeholder="Enter Password" class="form-control form-control-lg" />
-                                    </div>
+    <main class="h-screen register-form">
+        <v-container class="fill-height">
+            <v-layout class="d-flex align-center justify-center">
+                <v-card class="mx-auto pa-12 pb-8 w-50" elevation="8" rounded="lg">
+                    <v-card class="mb-12" color="surface-variant" variant="tonal" v-if="message !== ''">
+                        <v-alert color="error">{{ message }}</v-alert>
+                    </v-card>
 
-                                    <button type="submit" :disabled="processing" class="btn btn-primary btn-block">
-                                        {{ processing ? "Please wait" : "Register" }}
-                                    </button>
-                                </form>
-                            </div>
-                            <p class="mb-0">Already have an account? <router-link :to="{name:'login'}">Login Now!</router-link></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+                    <v-form v-model="valid" ref="form">
+                        <div class="text-subtitle-1 text-medium-emphasis">Name</div>
+                        <v-text-field density="compact"
+                              v-model="user.name"
+                              :rules="nameRules"
+                              required
+                              placeholder="Name"
+                              prepend-inner-icon="mdi-account-details-outline"
+                              variant="outlined"
+                              clearable
+                        ></v-text-field>
+
+                        <v-text-field density="compact"
+                              v-model="user.email"
+                              :type="'email'"
+                              :rules="emailRules"
+                              required
+                              placeholder="Email address"
+                              prepend-inner-icon="mdi-email-outline"
+                              variant="outlined"
+                              clearable
+                        ></v-text-field>
+
+                        <v-text-field :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                              v-model="user.password"
+                              :rules="passwordRules"
+                              :type="showPassword ? 'text' : 'password'"
+                              density="compact"
+                              placeholder="Enter your password"
+                              prepend-inner-icon="mdi-lock-outline"
+                              variant="outlined"
+                              @click:append-inner="showPassword = !showPassword"
+                              clearable
+                        ></v-text-field>
+
+                        <v-text-field :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                              v-model="user.password_confirmation"
+                              :rules="passwordRules"
+                              :type="showPassword ? 'text' : 'password'"
+                              density="compact"
+                              placeholder="Enter your password"
+                              prepend-inner-icon="mdi-lock-outline"
+                              variant="outlined"
+                              @click:append-inner="showPassword = !showPassword"
+                              clearable
+                        ></v-text-field>
+
+                        <v-btn type="submit" block class="mb-8" color="blue" size="large" variant="tonal"
+                               @click="register" :disabled="processing"
+                               :class=" { disabled: !valid }"
+                        >
+                            {{ processing ? "Please wait" : "Register" }}
+                        </v-btn>
+                    </v-form>
+
+                    <v-card-text class="text-center">
+                        Already have an account? <router-link class="text-blue text-decoration-none" :to="{name:'login'}">Login Now!</router-link>
+                    </v-card-text>
+                </v-card>
+            </v-layout>
+        </v-container>
+    </main>
 </template>
 
 <script>
@@ -53,8 +84,22 @@ export default {
                 password: "",
                 password_confirmation: ""
             },
+            message: "",
             validationErrors: {},
-            processing: false
+            valid: false,
+            processing: false,
+            showPassword: false,
+            nameRules: [
+                (v) => !!v || 'Name is required',
+            ],
+            passwordRules: [
+                (v) => !!v || 'Password is required',
+                (v) => v.length >= 8 || 'Password must be at least 8 characters',
+            ],
+            emailRules: [
+                (v) => !!v || 'E-mail is required',
+                (v) => /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v) || 'E-mail must be valid'
+            ],
         }
     },
     methods: {
@@ -69,6 +114,7 @@ export default {
                 this.signIn();
             }).catch(({response}) => {
                 if (response.status === 422) {
+                    this.message = response.data.message;
                     this.validationErrors = response.data.errors;
                 } else {
                     this.validationErrors = {}

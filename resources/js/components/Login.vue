@@ -1,8 +1,8 @@
 <template>
-    <main class="login-form">
+    <main class="h-screen login-form">
         <v-container class="fill-height">
             <v-layout class="d-flex align-center justify-center">
-                <v-card class="mx-auto pa-12 pb-8" elevation="8" max-width="448" rounded="lg">
+                <v-card class="mx-auto pa-12 pb-8 w-50" elevation="8" rounded="lg">
                     <v-card class="mb-12" color="surface-variant" variant="tonal" v-if="message !== ''">
                         <v-alert color="error">{{ message }}</v-alert>
                     </v-card>
